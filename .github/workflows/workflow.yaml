@@ -1,0 +1,27 @@
+name: CI
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+    - name: Install modules
+      run: npm ci -f
+      env:
+        NODE_ENV: 'development'
+    - name: Install serverless
+      run: sudo npm install -g serverless
+    - name: Install serverless-plugin-common-excludes
+      run: sudo serverless plugin install -n serverless-plugin-common-excludes
+    - name: Install glob
+      run: sudo npm install -g glob
+    - name: Compile ts
+      run: tsc
+      continue-on-error: true
+    - name: Deploy sls
+      run: serverless deploy
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        SLS_DEBUG: '*'
